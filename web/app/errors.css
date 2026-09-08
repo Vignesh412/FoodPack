@@ -7,3 +7,53 @@
   color: #8c3f29;
   font-size: 13px;
 }
+
+.goal-picker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 22px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #f1f4eb;
+  color: #66746e;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.goal-picker select {
+  min-width: 220px;
+  padding: 10px 34px 10px 12px;
+  border: 1px solid #d4dcd5;
+  border-radius: 10px;
+  color: #183229;
+  background: #fff;
+}
+
+.trace-card {
+  margin-top: 20px;
+  padding: 20px 24px;
+  border: 1px solid #dfe4dc;
+  border-radius: 18px;
+  background: rgba(255, 254, 250, 0.9);
+}
+
+.trace-card summary {
+  color: #1f684c;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.trace-card ol {
+  margin: 16px 0 0;
+  padding-left: 22px;
+  color: #66746e;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+@media (max-width: 760px) {
+  .goal-picker { align-items: stretch; flex-direction: column; }
+  .goal-picker select { width: 100%; min-width: 0; }
+}

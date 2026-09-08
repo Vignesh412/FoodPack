@@ -4,7 +4,7 @@ FoodProof turns photographs of a US packaged-food label into a clear, evidence-b
 
 ## Current status
 
-- **Consumer web app:** responsive Scan → Confirm → Understand experience in `web/`.
+- **Consumer web app:** responsive Scan → Confirm → Understand experience in `web/`, including nutrition goals, editable confirmation, portion recalculation, allergen/missing-evidence summaries, and an expandable workflow trace.
 - **Analysis API:** FastAPI boundary in `api.py` with upload validation, image-quality checks, vision extraction, and confirmed-label analysis.
 - **Nutrition engine:** tested modules in `src/` for calculations, FDA retrieval, claim evidence, comparisons, barcode checks, and safety routing.
 - **Legacy prototype:** the original Streamlit interface remains in `app.py`.
@@ -113,8 +113,10 @@ tests/                       Unit, workflow, safety, and API tests
 ## Remaining production work
 
 1. Deploy the Python API and configure `FOODPROOF_API_URL` for the hosted web app.
-2. Store user-owned scan history in D1 and short-lived images in R2.
-3. Add authentication-aware history, deletion, and privacy controls.
-4. Add rate limits, request authentication, structured logs, monitoring, and cost alerts.
-5. Evaluate clear, blurred, cropped, reflective, and unusual labels on real devices.
-6. Complete accessibility, privacy, legal, nutrition-safety, and regulatory review.
+2. Add the two-product comparison and optional barcode workflow to the consumer interface.
+3. Store user-owned scan history in D1 and short-lived images in R2.
+4. Add authentication-aware history, deletion, and privacy controls.
+5. Add rate limits, request authentication, structured logs, monitoring, and cost alerts.
+6. Evaluate clear, blurred, cropped, reflective, and unusual labels on real devices.
+7. Add repository screenshots, the final architecture diagram, and the 90–120 second demonstration.
+8. Complete accessibility, privacy, legal, nutrition-safety, and regulatory review.
