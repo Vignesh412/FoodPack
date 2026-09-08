@@ -4,7 +4,7 @@ FoodProof turns photographs of a US packaged-food label into a clear, evidence-b
 
 ## Current status
 
-- **Consumer web app:** responsive Scan → Confirm → Understand experience in `web/`, including nutrition goals, editable confirmation, portion recalculation, allergen/missing-evidence summaries, and an expandable workflow trace.
+- **Consumer web app:** responsive Scan → Confirm → Understand experience in `web/`, including nutrition goals, editable confirmation, portion recalculation, allergen/missing-evidence summaries, workflow trace, barcode entry, normalized comparison, scan-history, and privacy/account interfaces.
 - **Analysis API:** FastAPI boundary in `api.py` with upload validation, image-quality checks, vision extraction, and confirmed-label analysis.
 - **Nutrition engine:** tested modules in `src/` for calculations, FDA retrieval, claim evidence, comparisons, barcode checks, and safety routing.
 - **Legacy prototype:** the original Streamlit interface remains in `app.py`.
@@ -113,9 +113,9 @@ tests/                       Unit, workflow, safety, and API tests
 ## Remaining production work
 
 1. Deploy the Python API and configure `FOODPROOF_API_URL` for the hosted web app.
-2. Add the two-product comparison and optional barcode workflow to the consumer interface.
-3. Store user-owned scan history in D1 and short-lived images in R2.
-4. Add authentication-aware history, deletion, and privacy controls.
+2. Connect the comparison and optional barcode interfaces to their existing Python workflow tools.
+3. Store user-owned scan history in D1 and short-lived images in R2; the current history entries are representative interface data.
+4. Connect the account/privacy controls to authentication, deletion, and retention actions.
 5. Add rate limits, request authentication, structured logs, monitoring, and cost alerts.
 6. Evaluate clear, blurred, cropped, reflective, and unusual labels on real devices.
 7. Add repository screenshots, the final architecture diagram, and the 90–120 second demonstration.

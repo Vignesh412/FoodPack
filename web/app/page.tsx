@@ -3,6 +3,7 @@
 import { ChangeEvent, useMemo, useState } from 'react';
 
 type Step = 'scan' | 'confirm' | 'result';
+type View = 'analyze' | 'compare' | 'history' | 'privacy';
 type PhotoSlot = 'front' | 'nutrition' | 'ingredients';
 type PhotoEntry = { file: File; url: string };
 type NutrientView = { name: string; value: string; daily: string; tone: string };
@@ -23,6 +24,7 @@ const demoNutrients = [
 ];
 
 export default function Home() {
+  const [view, setView] = useState<View>('analyze');
   const [step, setStep] = useState<Step>('scan');
   const [photos, setPhotos] = useState<Partial<Record<PhotoSlot, PhotoEntry>>>({});
   const [portion, setPortion] = useState(1);
@@ -34,6 +36,7 @@ export default function Home() {
   const [goal, setGoal] = useState('general_understanding');
   const [labelData, setLabelData] = useState<ExtractedLabel | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+  const [barcode, setBarcode] = useState('');
   const completed = Object.keys(photos).length;
   const portionLabel = useMemo(() => `${portion} ${portion === 1 ? 'serving' : 'servings'}`, [portion]);
 
@@ -112,18 +115,18 @@ export default function Home() {
   return (
     <main className="app-shell">
       <header className="topbar">
-        <a className="brand" href="#" aria-label="FoodProof home"><span className="brand-mark">F</span><span>FoodProof</span></a>
-        <div className="trust-pill"><span className="status-dot" />Evidence-first nutrition</div>
-        <button className="avatar" aria-label="Open profile">VG</button>
+        <button className="brand brand-button" onClick={() => { setView('analyze'); setStep('scan'); }} aria-label="FoodProof home"><span className="brand-mark">F</span><span>FoodProof</span></button>
+        <nav className="main-nav" aria-label="Primary navigation"><button className={view === 'analyze' ? 'selected' : ''} onClick={() => setView('analyze')}>Analyze</button><button className={view === 'compare' ? 'selected' : ''} onClick={() => setView('compare')}>Compare</button><button className={view === 'history' ? 'selected' : ''} onClick={() => setView('history')}>History</button></nav>
+        <button className="avatar" onClick={() => setView('privacy')} aria-label="Open account and privacy">VG</button>
       </header>
-      <div className="stepper" aria-label="Analysis progress">
+      {view === 'analyze' && <div className="stepper" aria-label="Analysis progress">
         {['Scan', 'Confirm', 'Understand'].map((label, index) => {
           const activeIndex = step === 'scan' ? 0 : step === 'confirm' ? 1 : 2;
           return <div className={`step ${index <= activeIndex ? 'active' : ''}`} key={label}><span>{index + 1}</span>{label}</div>;
         })}
-      </div>
+      </div>}
 
-      {step === 'scan' && <section className="screen scan-screen">
+      {view === 'analyze' && step === 'scan' && <section className="screen scan-screen">
         <div className="hero-copy"><span className="eyebrow">Know what you’re eating</span><h1>Turn the label around.<br /><em>We’ll make it clear.</em></h1><p>Photograph three sides of the package. FoodProof checks the facts, explains what matters, and shows its evidence.</p></div>
         <div className="capture-card">
           <div className="capture-head"><div><span className="mini-label">New analysis</span><h2>Add your package photos</h2></div><span className="count">{completed}/3 ready</span></div>
@@ -133,12 +136,13 @@ export default function Home() {
             <PhotoInput slot="nutrition" title="Nutrition facts" hint="Keep the full panel visible" photo={photos.nutrition?.url} onChange={addPhoto} featured />
             <PhotoInput slot="ingredients" title="Ingredients" hint="Include allergen statement" photo={photos.ingredients?.url} onChange={addPhoto} />
           </div>
+          <label className="barcode-field"><span><strong>Barcode</strong><small>Optional supporting check—it never overrides the package.</small></span><input inputMode="numeric" value={barcode} onChange={(event) => setBarcode(event.target.value.replace(/\D/g, ''))} placeholder="Enter 8–14 digits" aria-label="Product barcode" /></label>
           {error && <p className="error-message" role="alert">{error}</p>}
           <div className="capture-footer"><p><span>◆</span> Photos are processed securely and aren’t used to train models.</p><button className="primary" onClick={beginAnalysis} disabled={isAnalyzing || (completed > 0 && completed < 3)}>{isAnalyzing ? 'Checking photos…' : completed === 0 ? 'Try with a demo label' : 'Check my label'} <span>→</span></button></div>
         </div>
       </section>}
 
-      {step === 'confirm' && <section className="screen confirm-screen">
+      {view === 'analyze' && step === 'confirm' && <section className="screen confirm-screen">
         <button className="back" onClick={() => setStep('scan')}>← Back to photos</button>
         <div className="section-heading"><span className="eyebrow">Quick accuracy check</span><h1>Does this match the label?</h1><p>AI can misread small print. Confirm these values before we calculate anything.</p></div>
         <div className="confirm-layout">
@@ -153,7 +157,7 @@ export default function Home() {
         </div>
       </section>}
 
-      {step === 'result' && <section className="screen result-screen">
+      {view === 'analyze' && step === 'result' && <section className="screen result-screen">
         <button className="back" onClick={() => setStep('confirm')}>← Review values</button>
         <div className="result-hero"><div><span className="eyebrow">{productName} · {portionLabel}</span><h1>Your label, made useful.</h1><p>See the strongest signals from the values you confirmed.</p></div><div className="score"><span>Label overview</span><strong>Checked</strong><small>Based on confirmed label values</small></div></div>
         <div className="result-grid">
@@ -166,8 +170,32 @@ export default function Home() {
         {!!analysis?.trace?.length && <details className="trace-card"><summary>See how FoodProof reached this result</summary><ol>{analysis.trace.map((line, index) => <li key={`${index}-${line}`}>{line}</li>)}</ol></details>}
         <div className="result-actions"><button className="secondary" onClick={() => { setPhotos({}); setStep('scan'); }}>Scan another product</button><button className="primary">Save to my history</button></div>
       </section>}
+      {view === 'compare' && <ComparisonView onAnalyze={() => { setView('analyze'); setStep('scan'); }} />}
+      {view === 'history' && <HistoryView onOpen={() => { setView('analyze'); setStep('result'); }} />}
+      {view === 'privacy' && <PrivacyView />}
     </main>
   );
+}
+
+function ComparisonView({ onAnalyze }: { onAnalyze: () => void }) {
+  const [basis, setBasis] = useState<'serving' | '100g'>('100g');
+  const rows = basis === '100g' ? [
+    ['Added sugar', '30 g', '18 g', 'Product B'], ['Sodium', '533 mg', '345 mg', 'Product B'], ['Fibre', '3.3 g', '7.3 g', 'Product B'], ['Protein', '6.7 g', '9.1 g', 'Product B'],
+  ] : [
+    ['Added sugar', '9 g', '10 g', 'Product A'], ['Sodium', '160 mg', '190 mg', 'Product A'], ['Fibre', '1 g', '4 g', 'Product B'], ['Protein', '2 g', '5 g', 'Product B'],
+  ];
+  return <section className="screen feature-screen"><div className="feature-heading"><span className="eyebrow">Fair comparison</span><h1>Same basis. Clearer choice.</h1><p>FoodProof normalizes different serving sizes so packaging choices don’t distort the comparison.</p></div><div className="compare-products"><ProductMini name="Golden Flakes" detail="30 g serving" color="gold" /><div className="versus">VS</div><ProductMini name="Morning Crunch" detail="55 g serving" color="green" /></div><div className="basis-toggle"><button className={basis === 'serving' ? 'active' : ''} onClick={() => setBasis('serving')}>Per labelled serving</button><button className={basis === '100g' ? 'active' : ''} onClick={() => setBasis('100g')}>Per 100 g</button></div><article className="comparison-card"><div className="comparison-row header"><span>Nutrient</span><span>Golden Flakes</span><span>Morning Crunch</span><span>Lower / higher*</span></div>{rows.map(row => <div className="comparison-row" key={row[0]}><strong>{row[0]}</strong><span>{row[1]}</span><span>{row[2]}</span><span className="winner">{row[3]}</span></div>)}<p className="table-note">*Lower is highlighted for sugar and sodium; higher is highlighted for fibre and protein. This is not a universal health score.</p></article><div className="feature-actions"><button className="secondary" onClick={onAnalyze}>Analyze another product</button><button className="primary">Replace a product</button></div></section>;
+}
+
+function ProductMini({ name, detail, color }: { name: string; detail: string; color: string }) { return <article className="product-mini"><span className={`mini-pack ${color}`}>FP</span><div><strong>{name}</strong><small>{detail}</small></div><span className="verified">✓ Confirmed</span></article>; }
+
+function HistoryView({ onOpen }: { onOpen: () => void }) {
+  const items = [{ name: 'Harvest Crunch', date: 'Today', note: 'High fibre · 18% sodium DV', color: 'gold' }, { name: 'Golden Flakes', date: 'Yesterday', note: 'Compared with Morning Crunch', color: 'cream' }, { name: 'Tomato & Basil Soup', date: '4 Sep', note: 'Sodium flagged for usual portion', color: 'red' }];
+  return <section className="screen feature-screen"><div className="feature-heading left"><span className="eyebrow">Your library</span><h1>Past label checks</h1><p>Revisit confirmed values and evidence without rescanning the package.</p></div><div className="history-toolbar"><label><span className="sr-only">Search history</span><input placeholder="Search products" /></label><button className="primary" onClick={onOpen}>＋ New analysis</button></div><div className="history-grid">{items.map(item => <button className="history-card" onClick={onOpen} key={item.name}><span className={`history-thumb ${item.color}`}>FP</span><span><small>{item.date}</small><strong>{item.name}</strong><em>{item.note}</em></span><b>→</b></button>)}</div><p className="storage-note">History will be stored securely once account persistence is enabled. These entries currently demonstrate the completed interface.</p></section>;
+}
+
+function PrivacyView() {
+  return <section className="screen feature-screen narrow"><div className="feature-heading left"><span className="eyebrow">Account and privacy</span><h1>You control your food data.</h1><p>Food label photos should be temporary. Confirmed records should only be retained when you choose to save them.</p></div><div className="settings-list"><article><div><strong>Automatic photo deletion</strong><p>Delete original package photos after extraction completes.</p></div><span className="toggle on" aria-label="Automatic deletion enabled">●</span></article><article><div><strong>Save confirmed results</strong><p>Keep only structured label values and evidence in your history.</p></div><span className="toggle on" aria-label="Save results enabled">●</span></article><article><div><strong>Improve FoodProof</strong><p>Share anonymous error and performance data. Label contents are excluded.</p></div><span className="toggle" aria-label="Analytics disabled">●</span></article></div><div className="danger-zone"><div><strong>Delete all FoodProof data</strong><p>Permanently remove saved scans and account preferences.</p></div><button>Delete my data</button></div><p className="privacy-footnote">FoodProof explains package labels. It does not provide diagnosis, treatment advice, or an allergy-safety guarantee.</p></section>;
 }
 
 function PhotoInput({ slot, title, hint, photo, onChange, featured = false }: { slot: PhotoSlot; title: string; hint: string; photo?: string; featured?: boolean; onChange: (slot: PhotoSlot, event: ChangeEvent<HTMLInputElement>) => void }) {
