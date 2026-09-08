@@ -1,0 +1,12 @@
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+.streamlit/secrets.toml
+*.egg-info/
+.venv/
+venv/
+sample_images/*.jpg
+sample_images/*.png
+!sample_images/.gitkeep
+eval_results/

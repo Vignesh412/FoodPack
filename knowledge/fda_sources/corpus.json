@@ -1,0 +1,86 @@
+[
+  {
+    "id": "dv-001",
+    "title": "The Lows and Highs of Percent Daily Value on the Nutrition Facts Label",
+    "section": "What %DV Means",
+    "url": "https://www.fda.gov/food/nutrition-facts-label/lows-and-highs-percent-daily-value-nutrition-facts-label",
+    "text": "The percent Daily Value (%DV) shows how much a nutrient in a serving of food contributes to a total daily diet. %DV can help you determine if a serving of food is high or low in a nutrient."
+  },
+  {
+    "id": "dv-002",
+    "title": "The Lows and Highs of Percent Daily Value on the Nutrition Facts Label",
+    "section": "Low and High Thresholds",
+    "url": "https://www.fda.gov/food/nutrition-facts-label/lows-and-highs-percent-daily-value-nutrition-facts-label",
+    "text": "As a general guide, 5% DV or less of a nutrient per serving is considered low, and 20% DV or more of a nutrient per serving is considered high."
+  },
+  {
+    "id": "dv-003",
+    "title": "The Lows and Highs of Percent Daily Value on the Nutrition Facts Label",
+    "section": "Nutrients to Watch",
+    "url": "https://www.fda.gov/food/nutrition-facts-label/lows-and-highs-percent-daily-value-nutrition-facts-label",
+    "text": "Use %DV to help choose foods that are higher in dietary fiber, vitamin D, calcium, iron, and potassium, and lower in saturated fat, sodium, and added sugars."
+  },
+  {
+    "id": "nfl-001",
+    "title": "How to Understand and Use the Nutrition Facts Label",
+    "section": "Serving Size",
+    "url": "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label",
+    "text": "Serving sizes are standardized to make it easier to compare similar foods; they reflect the amount people typically eat or drink. The serving size is not a recommendation of how much you should eat or drink. Pay attention to the serving size, especially how many servings there are in the food package."
+  },
+  {
+    "id": "nfl-002",
+    "title": "How to Understand and Use the Nutrition Facts Label",
+    "section": "Added Sugars",
+    "url": "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label",
+    "text": "Added sugars on the Nutrition Facts label include sugars added during processing, sugars packaged as sweeteners, sugars from syrups and honey, and sugars from concentrated fruit or vegetable juices. Diets high in calories from added sugars can make it difficult to meet daily recommended levels of important nutrients while staying within calorie limits."
+  },
+  {
+    "id": "nfl-003",
+    "title": "How to Understand and Use the Nutrition Facts Label",
+    "section": "Sodium",
+    "url": "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label",
+    "text": "Eating too much sodium is associated with an increased risk of developing some health conditions, like cardiovascular disease and high blood pressure. Sodium is a nutrient most people should aim to consume less of regularly."
+  },
+  {
+    "id": "nfl-004",
+    "title": "How to Understand and Use the Nutrition Facts Label",
+    "section": "Dietary Fiber",
+    "url": "https://www.fda.gov/food/nutrition-facts-label/how-understand-and-use-nutrition-facts-label",
+    "text": "Eating a diet high in dietary fiber can increase the frequency of bowel movements, lower blood glucose and cholesterol levels, and reduce calorie intake. Fiber is a nutrient most people should aim to consume more of."
+  },
+  {
+    "id": "claim-001",
+    "title": "NLEA Requirements - Nutrient Content Claim Thresholds",
+    "section": "Low Sodium / Low Fat",
+    "url": "https://www.fda.gov/nutrition-labeling-and-education-act-nlea-requirements-attachment-1",
+    "text": "\"Low sodium\" requires 140 mg or less per reference amount (and per 50 g if the reference amount is small). \"Low fat\" requires 3 g or less per reference amount (and per 50 g if the reference amount is small)."
+  },
+  {
+    "id": "claim-002",
+    "title": "NLEA Requirements - Nutrient Content Claim Thresholds",
+    "section": "Low Saturated Fat",
+    "url": "https://www.fda.gov/nutrition-labeling-and-education-act-nlea-requirements-attachment-1",
+    "text": "\"Low saturated fat\" requires 1 g or less per reference amount, and no more than 15% of calories from saturated fat."
+  },
+  {
+    "id": "claim-003",
+    "title": "NLEA Requirements - Nutrient Content Claim Thresholds",
+    "section": "Free Claims",
+    "url": "https://www.fda.gov/nutrition-labeling-and-education-act-nlea-requirements-attachment-1",
+    "text": "\"Sodium free\" requires less than 5 mg per reference amount and per labeled serving. \"Fat free\" requires less than 0.5 g per reference amount and per labeled serving. \"Saturated fat free\" requires less than 0.5 g saturated fat and less than 0.5 g trans fatty acids per reference amount and per labeled serving."
+  },
+  {
+    "id": "claim-004",
+    "title": "NLEA Requirements - Nutrient Content Claim Thresholds",
+    "section": "Reduced / Less Claims",
+    "url": "https://www.fda.gov/nutrition-labeling-and-education-act-nlea-requirements-attachment-1",
+    "text": "\"Reduced\" or \"less\" claims require at least 25% less of the named nutrient per reference amount than an appropriate reference food."
+  },
+  {
+    "id": "claim-005",
+    "title": "Nutrient Content Claims (21 CFR 101.54)",
+    "section": "Good Source / High Fiber",
+    "url": "https://www.fda.gov/food/nutrition-food-labeling-and-critical-foods/nutrient-content-claims",
+    "text": "\"Good source\" of a nutrient such as fiber generally means the food provides 10% to 19% of the Daily Value per reference amount. \"High\", \"rich in\", or \"excellent source\" generally means the food provides 20% or more of the Daily Value per reference amount. Verify current thresholds in 21 CFR 101.54 before relying on this for a real compliance determination."
+  }
+]
