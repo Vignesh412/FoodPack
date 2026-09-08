@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import './errors.css';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://foodproof.iyer-vignesh2.chatgpt.site'),
