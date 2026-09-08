@@ -79,7 +79,7 @@ export default function Home() {
 
   async function confirmAndAnalyze() {
     if (!labelData) {
-      setAnalysis({ trace: ['Demo label loaded.', 'Safety gate passed.', 'Portion calculation completed.', 'FDA evidence attached.', 'Evidence Card assembled.'] });
+      setAnalysis(null);
       setStep('result');
       return;
     }
@@ -111,6 +111,17 @@ export default function Home() {
     };
   });
   const allergens = labelData?.allergens;
+  const friendlyTrace = (analysis?.trace ?? []).map((line) => {
+    const normalized = line.toLowerCase();
+    if (normalized.includes('safety gate')) return 'Checked that the request stays within FoodProof’s safety boundaries';
+    if (normalized.includes('calculation')) return `Calculated the nutrition values for ${portionLabel}`;
+    if (normalized.includes('retrieval') || normalized.includes('fda')) return 'Matched the result with relevant FDA guidance';
+    if (normalized.includes('claim')) return 'Compared front-of-pack claims with the confirmed label';
+    if (normalized.includes('barcode')) return barcode ? 'Checked the barcode as supporting information' : 'Used the package as the primary evidence';
+    if (normalized.includes('comparison')) return 'Checked whether a fair product comparison was available';
+    if (normalized.includes('evidence card')) return 'Assembled the explanation with sources and limitations';
+    return line.replace(/^[^:]+:\s*/, '');
+  }).filter((line, index, all) => line && all.indexOf(line) === index);
 
   return (
     <main className="app-shell">
@@ -167,7 +178,7 @@ export default function Home() {
           <article className="safety-card"><span className="mini-label">Ingredients and allergens</span><h2>{allergens?.declared_contains?.length ? `Contains ${allergens.declared_contains.join(', ')}` : 'Check the package every time'}</h2><p>{allergens?.may_contain_statement?.length ? `May contain: ${allergens.may_contain_statement.join(', ')}. ` : ''}FoodProof reports declared label information; it cannot guarantee allergy safety.</p></article>
           {!!labelData?.missing_fields?.length && <article className="safety-card"><span className="mini-label">Missing evidence</span><h2>Some values need attention</h2><p>{labelData.missing_fields.join(', ').replaceAll('_', ' ')}</p></article>}
         </div>
-        {!!analysis?.trace?.length && <details className="trace-card"><summary>See how FoodProof reached this result</summary><ol>{analysis.trace.map((line, index) => <li key={`${index}-${line}`}>{line}</li>)}</ol></details>}
+        {!!labelData && friendlyTrace.length > 0 && <details className="trace-card"><summary><span>How we checked this label</span><small>See the evidence steps behind this result</small></summary><ol>{friendlyTrace.map((line, index) => <li key={`${index}-${line}`}><span className="trace-check">✓</span><span>{line}</span></li>)}</ol></details>}
         <div className="result-actions"><button className="secondary" onClick={() => { setPhotos({}); setStep('scan'); }}>Scan another product</button><button className="primary">Save to my history</button></div>
       </section>}
       {view === 'compare' && <ComparisonView onAnalyze={() => { setView('analyze'); setStep('scan'); }} />}

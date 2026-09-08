@@ -44,6 +44,7 @@
   font-weight: 800;
   cursor: pointer;
 }
+.trace-card summary > span,.trace-card summary > small { display: block; margin-left: 4px; }.trace-card summary > small { margin-top: 4px; color: #7a857f; font-size: 11px; font-weight: 400; }
 
 .trace-card ol {
   margin: 16px 0 0;
@@ -52,6 +53,7 @@
   font-size: 13px;
   line-height: 1.7;
 }
+.trace-card li { display: flex; align-items: flex-start; gap: 10px; margin: 9px 0; list-style: none; }.trace-check { display: grid; place-items: center; flex: 0 0 21px; height: 21px; border-radius: 50%; color: #1f684c; background: #e4efdf; font-size: 11px; font-weight: 900; }
 
 @media (max-width: 760px) {
   .goal-picker { align-items: stretch; flex-direction: column; }
