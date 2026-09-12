@@ -10,9 +10,9 @@ FoodProof Fit turns photographs of a US packaged-food label into a clear, eviden
 - **Evaluation dashboard:** visible Evals view backed by 52 versioned golden cases across safety, usability, calculations, retrieval, personalization, comparison, barcode, and alternative-finder rules, with vision evidence reported separately.
 - **Presentation mode:** three clearly labelled synthetic scenarios demonstrate daily-goal contribution, a declared-allergen match, and a refusal to guarantee allergy safety.
 - **Legacy prototype:** the original Streamlit interface remains in `app.py`.
-- **Hosted preview:** [foodproof.iyer-vignesh2.chatgpt.site](https://foodproof.iyer-vignesh2.chatgpt.site) (private access).
+- **Hosted release:** [foodproof-fit.drsunnymanchanda.chatgpt.site](https://foodproof-fit.drsunnymanchanda.chatgpt.site) (private access), connected to the deployed Render API.
 
-The hosted interface uses the demonstration label until a deployed API URL and `ANTHROPIC_API_KEY` are configured. It is a production-design preview until that connection is live.
+The hosted interface supports both the three presenter-safe demonstrations and the complete real-photo workflow. The Python API is live at [foodproof-fit-api.onrender.com](https://foodproof-fit-api.onrender.com), with the Anthropic vision credential and server-to-server authentication configured securely. Because the API uses Render's free service tier, the first request after inactivity may take approximately 30–60 seconds while the service wakes up.
 
 ## Architecture
 
@@ -65,11 +65,16 @@ The Analyze screen includes three presenter-safe scenarios:
 
 These are explicitly labelled synthetic cases and are not counted as vision-accuracy evidence. The complete recording guide is in [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md), the final readiness list is in [`docs/SUBMISSION_CHECKLIST.md`](docs/SUBMISSION_CHECKLIST.md), and the architecture can be opened directly from [`docs/foodproof-fit-architecture.svg`](docs/foodproof-fit-architecture.svg).
 
-## Cloud deployment
+## Live cloud deployment
 
-The repository includes a reproducible Render Blueprint for the Python API and an existing Sites configuration for the web interface. The deployment sequence, environment-variable mapping, health check, and acceptance tests are documented in [`docs/CLOUD_DEPLOYMENT.md`](docs/CLOUD_DEPLOYMENT.md).
+The current private release uses Sites for the consumer web interface and Render for the Python analysis API:
 
-For a hosted release, set the same long random `FOODPROOF_API_TOKEN` in both services. The browser never receives this value: the Sites server route adds it only when forwarding a request to the Python API.
+- **Web application:** [foodproof-fit.drsunnymanchanda.chatgpt.site](https://foodproof-fit.drsunnymanchanda.chatgpt.site)
+- **API health endpoint:** [foodproof-fit-api.onrender.com/health](https://foodproof-fit-api.onrender.com/health)
+
+The repository includes a reproducible Render Blueprint and Sites configuration. The deployment sequence, environment-variable mapping, health check, and acceptance tests are documented in [`docs/CLOUD_DEPLOYMENT.md`](docs/CLOUD_DEPLOYMENT.md).
+
+The same long random `FOODPROOF_API_TOKEN` is configured as a secret in both services. The browser never receives this value: the Sites server route adds it only when forwarding a request to the Python API. No populated environment file or API credential is committed to the repository.
 
 ## Run locally
 
@@ -156,10 +161,9 @@ tests/                       Unit, workflow, safety, and API tests
 
 ## Remaining production work
 
-1. Deploy the Python API from `render.yaml` and configure `FOODPROOF_API_URL` and `FOODPROOF_API_TOKEN` for the hosted web app.
-2. Store user-owned scan history in D1 and short-lived images in R2; the current history entries are representative interface data.
-3. Connect the account/privacy controls to authentication, deletion, and retention actions.
-4. Add platform rate limits, centralized monitoring, and cost alerts. Server-to-server authentication and privacy-preserving request logs are already implemented.
-5. Evaluate clear, blurred, cropped, reflective, and unusual labels on real devices.
-6. Add repository screenshots and record the 90–120 second demonstration.
-7. Expand the real-photo evaluation set, then complete accessibility, privacy, legal, nutrition-safety, and regulatory review.
+1. Store user-owned scan history in D1 and short-lived images in R2; the current prototype keeps structured history only for the active browser session.
+2. Connect the account/privacy controls to authentication, deletion, and retention actions.
+3. Add platform rate limits, centralized monitoring, uptime monitoring, and cost alerts. Server-to-server authentication and privacy-preserving request logs are already implemented.
+4. Complete structured real-device evaluation across clear, blurred, cropped, reflective, unusual, and non-US labels.
+5. Capture final screenshots and record the 90–120 second submission demonstration.
+6. Expand the real-photo evaluation set, then complete accessibility, privacy, legal, nutrition-safety, and regulatory review before any public production launch.
