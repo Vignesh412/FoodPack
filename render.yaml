@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: foodproof-fit-api
+    runtime: python
+    region: singapore
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn api:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeployTrigger: off
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: FOODPROOF_API_TOKEN
+        sync: false
+      - key: FOODPROOF_ALLOWED_ORIGINS
+        sync: false
+      - key: FOODPROOF_VISION_MODEL
+        value: claude-sonnet-4-6
+      - key: OFF_API_BASE
+        value: https://world.openfoodfacts.org
+      - key: OFF_SEARCH_API_URL
+        value: https://search.openfoodfacts.org/search
+      - key: OFF_USER_AGENT
+        value: FoodProofFit/1.2 (https://github.com/Vignesh412/FoodPack)

@@ -8,10 +8,12 @@ runs).
 from __future__ import annotations
 
 import base64
+import io
 import json
 import os
 from typing import Optional
 
+from PIL import Image, ImageOps
 from pydantic import ValidationError
 
 from src.schemas import (
@@ -63,6 +65,18 @@ Rules:
 
 class ExtractionError(Exception):
     pass
+
+
+MAX_VISION_EDGE_PX = 1600
+
+
+def prepare_image_for_vision(image_bytes: bytes) -> tuple[bytes, str]:
+    """Normalize orientation and bound image size before a paid vision call."""
+    image = ImageOps.exif_transpose(Image.open(io.BytesIO(image_bytes))).convert("RGB")
+    image.thumbnail((MAX_VISION_EDGE_PX, MAX_VISION_EDGE_PX), Image.Resampling.LANCZOS)
+    buffer = io.BytesIO()
+    image.save(buffer, format="JPEG", quality=90, optimize=True)
+    return buffer.getvalue(), "image/jpeg"
 
 
 def _mass_field(raw: Optional[dict], default_unit: MassUnit, confidence_notes: dict) -> NutrientField:
@@ -156,11 +170,12 @@ def _call_vision_model(images: list[tuple[bytes, str]], extra_instruction: str =
 
     import anthropic  # lazy import
 
-    client = anthropic.Anthropic(api_key=api_key)
-    model = os.environ.get("FOODPROOF_VISION_MODEL", "claude-opus-4-1-20250805")
+    client = anthropic.Anthropic(api_key=api_key, timeout=90.0, max_retries=0)
+    model = os.environ.get("FOODPROOF_VISION_MODEL", "claude-sonnet-4-6")
 
     content = []
-    for image_bytes, media_type in images:
+    for image_bytes, _media_type in images:
+        image_bytes, media_type = prepare_image_for_vision(image_bytes)
         b64 = base64.b64encode(image_bytes).decode("utf-8")
         content.append({"type": "image", "source": {"type": "base64", "media_type": media_type, "data": b64}})
     content.append({"type": "text", "text": _EXTRACTION_SCHEMA_INSTRUCTIONS + extra_instruction})

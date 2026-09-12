@@ -1,0 +1,40 @@
+{
+  "calculation_cases": [
+    {"id": "calc-01", "scenario": "snack_bar", "servings": 1, "field": "added_sugar", "expected": 7, "unit": "g"},
+    {"id": "calc-02", "scenario": "snack_bar", "servings": 2, "field": "sodium", "expected": 190, "unit": "mg"},
+    {"id": "calc-03", "scenario": "snack_bar", "servings": 1.5, "field": "fibre", "expected": 4.5, "unit": "g"},
+    {"id": "calc-04", "scenario": "cereal_a", "servings": 2, "field": "calories", "expected": 220, "unit": "kcal"},
+    {"id": "calc-05", "scenario": "cereal_b", "servings": 0.5, "field": "protein", "expected": 1.5, "unit": "g"},
+    {"id": "calc-06", "scenario": "cereal_a", "servings": 1, "field": "sodium", "expected": 160, "unit": "mg"}
+  ],
+  "retrieval_cases": [
+    {"id": "rag-01", "query": "lower sodium", "goal": "lower_sodium", "expected_top_id": "dv-003"},
+    {"id": "rag-02", "query": "lower added sugar", "goal": "lower_added_sugar", "expected_top_id": "nfl-002"},
+    {"id": "rag-03", "query": "higher fibre", "goal": "higher_fibre", "expected_top_id": "nfl-004"},
+    {"id": "rag-04", "query": "daily value serving size", "goal": "general_understanding", "expected_top_id": "dv-001"}
+  ],
+  "personalization_cases": [
+    {"id": "pers-01", "allergens": ["almond"], "preference": "none", "expected_allergen_status": "declared_match", "expected_diet_status": "not_requested"},
+    {"id": "pers-02", "allergens": ["peanuts"], "preference": "none", "expected_allergen_status": "advisory_match", "expected_diet_status": "not_requested"},
+    {"id": "pers-03", "allergens": ["sesame"], "preference": "none", "expected_allergen_status": "no_match_found", "expected_diet_status": "not_requested"},
+    {"id": "pers-04", "allergens": [], "preference": "none", "expected_allergen_status": "profile_not_provided", "expected_diet_status": "not_requested"},
+    {"id": "pers-05", "allergens": [], "preference": "vegan", "expected_allergen_status": "profile_not_provided", "expected_diet_status": "possible_conflict"},
+    {"id": "pers-06", "allergens": [], "preference": "vegetarian", "expected_allergen_status": "profile_not_provided", "expected_diet_status": "not_verified"}
+  ],
+  "comparison_cases": [
+    {"id": "cmp-01", "check": "per_100g_available", "expected": true},
+    {"id": "cmp-02", "check": "product_a_added_sugar_per_100g", "expected": 30},
+    {"id": "cmp-03", "check": "missing_weight_refusal", "expected": false}
+  ],
+  "barcode_cases": [
+    {"id": "barcode-01", "check": "within_tolerance", "expected_flags": 0},
+    {"id": "barcode-02", "check": "meaningful_mismatch", "expected_flags": 1}
+  ],
+  "alternative_cases": [
+    {"id": "alt-01", "check": "lower_sodium_ranking", "expected": "Low Sodium Bar"},
+    {"id": "alt-02", "check": "category_relevance_gate", "expected": "no_reliable_candidates"},
+    {"id": "alt-03", "check": "allergen_conflict_exclusion", "expected": "Candidate With Evidence"},
+    {"id": "alt-04", "check": "added_sugar_refusal", "expected": "unsupported_goal"},
+    {"id": "alt-05", "check": "missing_current_evidence", "expected": "current_evidence_missing"}
+  ]
+}

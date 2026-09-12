@@ -1,6 +1,9 @@
-import pytest
+from io import BytesIO
 
-from src.label_extractor import ExtractionError, extract_label, parse_extraction_response
+import pytest
+from PIL import Image
+
+from src.label_extractor import ExtractionError, extract_label, parse_extraction_response, prepare_image_for_vision
 from src.schemas import MassUnit
 
 
@@ -32,3 +35,14 @@ def test_extract_label_raises_clear_error_without_api_key(monkeypatch):
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     with pytest.raises(ExtractionError, match="ANTHROPIC_API_KEY"):
         extract_label([(b"fake-bytes", "image/jpeg")])
+
+
+def test_prepare_image_for_vision_bounds_size_and_normalizes_format():
+    source = BytesIO()
+    Image.new("RGB", (3200, 2400), "white").save(source, format="PNG")
+
+    optimized, media_type = prepare_image_for_vision(source.getvalue())
+    result = Image.open(BytesIO(optimized))
+
+    assert media_type == "image/jpeg"
+    assert result.size == (1600, 1200)

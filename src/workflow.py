@@ -23,10 +23,11 @@ from langgraph.graph import END, StateGraph
 from src.claim_evidence import ClaimVerdict, evaluate_claims
 from src.comparison import ComparisonResult, compare_products
 from src.nutrition_rules import PortionCalculation, calculate_portion
+from src.personalization import PersonalizationResult, personalize
 from src.product_lookup import DeltaFlag, OFFLookupResult, compute_delta_flags, lookup_barcode
 from src.rag_retriever import RetrievedPassage, get_retriever
 from src.safety_gate import SafetyDecision, evaluate_safety
-from src.schemas import ExtractedLabel, PortionSelection
+from src.schemas import ExtractedLabel, PersonalizationProfile, PortionSelection
 
 
 class WorkflowState(TypedDict, total=False):
@@ -40,6 +41,7 @@ class WorkflowState(TypedDict, total=False):
     second_portion: Optional[PortionSelection]
     first_name: str
     second_name: Optional[str]
+    profile: Optional[PersonalizationProfile]
 
     # accumulated trace (list-concatenating reducer, so every node's log
     # line is appended rather than overwriting the previous ones)
@@ -49,6 +51,7 @@ class WorkflowState(TypedDict, total=False):
     safety_decision: Optional[SafetyDecision]
     blocked: bool
     calculation: Optional[PortionCalculation]
+    personalization: Optional[PersonalizationResult]
     retrieved_passages: Optional[list[RetrievedPassage]]
     claim_verdicts: Optional[list[ClaimVerdict]]
     off_lookup: Optional[OFFLookupResult]
@@ -81,6 +84,23 @@ def node_calculate(state: WorkflowState) -> dict:
     return {
         "calculation": calc,
         "trace": [f"Calculation: recomputed {len(calc.results)} nutrients for {state['portion'].servings_consumed:g} serving(s)."],
+    }
+
+
+def node_personalize(state: WorkflowState) -> dict:
+    if state.get("blocked"):
+        return {"trace": ["Personalization: skipped — safety gate blocked this request."]}
+    profile = state.get("profile")
+    calculation = state.get("calculation")
+    if profile is None or calculation is None:
+        return {"trace": ["Personalization: skipped — no user profile was provided."]}
+    result = personalize(state["label"], calculation, profile)
+    return {
+        "personalization": result,
+        "trace": [
+            f"Personalization: checked {len(result.goal_contributions)} daily target(s), "
+            f"allergen profile, and {profile.dietary_preference} preference."
+        ],
     }
 
 
@@ -165,13 +185,22 @@ def node_build_evidence_card(state: WorkflowState) -> dict:
         return {"evidence_card": card, "trace": ["Evidence Card: refusal message assembled — no nutrient data disclosed for an unsafe request."]}
 
     label: ExtractedLabel = state["label"]
+    claim_verdicts = state.get("claim_verdicts") or []
+    claim_citation_ids = {
+        citation_id
+        for verdict in claim_verdicts
+        for citation_id in verdict.citation_ids
+    }
     card = {
         "refused": False,
         "product_name": label.product_name,
         "missing_fields": label.missing_fields,
         "calculation": state.get("calculation"),
+        "personalization": state.get("personalization"),
         "citations": state.get("retrieved_passages") or [],
-        "claim_verdicts": state.get("claim_verdicts") or [],
+        "claim_verdicts": claim_verdicts,
+        "claim_sources": get_retriever().source_references(claim_citation_ids),
+        "barcode_lookup": state.get("off_lookup"),
         "delta_flags": state.get("delta_flags") or [],
         "comparison": state.get("comparison"),
     }
@@ -186,6 +215,7 @@ def build_workflow():
     graph = StateGraph(WorkflowState)
     graph.add_node("safety_check", node_safety_check)
     graph.add_node("calculate", node_calculate)
+    graph.add_node("personalize", node_personalize)
     graph.add_node("retrieve", node_retrieve)
     graph.add_node("claims", node_claims)
     graph.add_node("barcode", node_barcode)
@@ -196,7 +226,8 @@ def build_workflow():
     graph.add_conditional_edges(
         "safety_check", _route_after_safety, {"evidence_card": "evidence_card", "calculate": "calculate"}
     )
-    graph.add_edge("calculate", "retrieve")
+    graph.add_edge("calculate", "personalize")
+    graph.add_edge("personalize", "retrieve")
     graph.add_edge("retrieve", "claims")
     graph.add_edge("claims", "barcode")
     graph.add_edge("barcode", "compare")
@@ -226,6 +257,7 @@ def run_workflow(
     second_portion: Optional[PortionSelection] = None,
     first_name: str = "This product",
     second_name: Optional[str] = None,
+    profile: Optional[PersonalizationProfile] = None,
 ) -> WorkflowState:
     initial_state: WorkflowState = {
         "label": label,
@@ -237,6 +269,7 @@ def run_workflow(
         "second_portion": second_portion,
         "first_name": first_name,
         "second_name": second_name,
+        "profile": profile,
         "trace": [],
         "blocked": False,
     }
