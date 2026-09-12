@@ -14,6 +14,9 @@ export async function POST(request: Request) {
 
   const response = await fetch(`${apiUrl.replace(/\/$/, '')}/v1/extract`, {
     method: 'POST',
+    headers: env.FOODPROOF_API_TOKEN
+      ? { authorization: `Bearer ${env.FOODPROOF_API_TOKEN}` }
+      : undefined,
     body: await request.formData(),
   });
   const body = await response.text();

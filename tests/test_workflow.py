@@ -46,3 +46,11 @@ def test_portion_scaling_flows_through_the_whole_workflow():
     sugar_1x = result_1x["evidence_card"]["calculation"].results["added_sugar"].per_actual_portion.value
     sugar_2x = result_2x["evidence_card"]["calculation"].results["added_sugar"].per_actual_portion.value
     assert sugar_2x == sugar_1x * 2
+
+
+def test_claim_citation_ids_resolve_to_visible_source_records():
+    result = run_workflow(snack_bar_scenario_1(), PortionSelection(), goal="higher_fibre")
+    card = result["evidence_card"]
+    claim_ids = {citation_id for verdict in card["claim_verdicts"] for citation_id in verdict.citation_ids}
+    source_ids = {source["id"] for source in card["claim_sources"]}
+    assert claim_ids <= source_ids

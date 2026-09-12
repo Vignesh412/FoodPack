@@ -94,38 +94,46 @@ def _evaluate_one(claim_type: str, label: ExtractedLabel) -> tuple[Verdict, str,
         if field.amount is None:
             return _verdict("insufficient_evidence", "Saturated fat was not confirmed on this label.", [])
         grams = field.amount.to_grams()
-        if grams <= 1:
-            return _verdict("supported", f"Confirmed saturated fat is {grams:.2f} g, at or under the 1 g low-saturated-fat threshold.", ["claim-002"])
-        return _verdict("not_supported", f"Confirmed saturated fat is {grams:.2f} g, above the 1 g low-saturated-fat threshold.", ["claim-002"])
+        return _verdict(
+            "insufficient_evidence",
+            f"Confirmed saturated fat is {grams:.2f} g per labelled serving, but this prototype "
+            "does not have the FDA reference amount or the percentage of calories from saturated "
+            "fat needed to check the complete low-saturated-fat rule.",
+            ["claim-002"],
+        )
 
     if claim_type == "saturated_fat_free":
         field = label.saturated_fat
         if field.amount is None:
             return _verdict("insufficient_evidence", "Saturated fat was not confirmed on this label.", [])
         grams = field.amount.to_grams()
-        if grams < 0.5:
-            return _verdict("supported", f"Confirmed saturated fat is {grams:.2f} g, under the 0.5 g free-claim threshold.", ["claim-003"])
-        return _verdict("not_supported", f"Confirmed saturated fat is {grams:.2f} g, at or above the 0.5 g free-claim threshold.", ["claim-003"])
+        return _verdict(
+            "insufficient_evidence",
+            f"Confirmed saturated fat is {grams:.2f} g per labelled serving, but trans fat and the "
+            "FDA reference amount are also needed to check the complete saturated-fat-free rule.",
+            ["claim-003"],
+        )
 
     if claim_type in ("good_source_fiber", "high_fiber"):
         field = label.fibre
         if field.percent_daily_value is None:
             return _verdict("insufficient_evidence", "Fibre %DV was not confirmed on this label.", [])
         dv = field.percent_daily_value
-        if claim_type == "good_source_fiber" and dv >= 10:
-            return _verdict("supported", f"Confirmed fibre is {dv:.0f}% DV, meeting the 10% DV good-source reference.", ["claim-005"])
+        if claim_type == "good_source_fiber" and 10 <= dv < 20:
+            return _verdict("supported", f"Confirmed fibre is {dv:.0f}% DV, within the 10%–19% DV good-source reference range.", ["claim-005"])
         if claim_type == "high_fiber" and dv >= 20:
             return _verdict("supported", f"Confirmed fibre is {dv:.0f}% DV, meeting the 20% DV high/excellent-source reference.", ["claim-005"])
-        return _verdict("not_supported", f"Confirmed fibre is {dv:.0f}% DV, below the reference threshold for this claim.", ["claim-005"])
+        if claim_type == "good_source_fiber" and dv >= 20:
+            return _verdict("not_supported", f"Confirmed fibre is {dv:.0f}% DV, outside the 10%–19% DV good-source reference range and within the separate high range.", ["claim-005"])
+        return _verdict("not_supported", f"Confirmed fibre is {dv:.0f}% DV, below the reference range for this claim.", ["claim-005"])
 
     if claim_type == "sugar_free":
-        field = label.added_sugar
-        if field.amount is None:
-            return _verdict("insufficient_evidence", "Added sugar was not confirmed on this label.", [])
-        grams = field.amount.to_grams()
-        if grams < 0.5:
-            return _verdict("supported", f"Confirmed added sugar is {grams:.2f} g, under the 0.5 g free-claim threshold.", ["claim-003"])
-        return _verdict("not_supported", f"Confirmed added sugar is {grams:.2f} g, at or above the 0.5 g free-claim threshold.", ["claim-003"])
+        return _verdict(
+            "insufficient_evidence",
+            "A sugar-free claim depends on total sugars and FDA reference-amount conditions. "
+            "This prototype captures added sugar, which is not enough to check that claim safely.",
+            ["claim-003"],
+        )
 
     if claim_type == "no_added_sugar":
         ingredient_text = (label.allergens.raw_ingredient_text or "").lower()

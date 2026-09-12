@@ -17,6 +17,10 @@ import requests
 from pydantic import BaseModel
 
 OFF_API_BASE = os.environ.get("OFF_API_BASE", "https://world.openfoodfacts.org")
+OFF_USER_AGENT = os.environ.get(
+    "OFF_USER_AGENT",
+    "FoodProofFit/1.1 (https://github.com/Vignesh412/FoodPack)",
+)
 REQUEST_TIMEOUT_SECONDS = 6
 
 # Fields we can meaningfully diff against our schema, mapped to OFF's
@@ -51,7 +55,12 @@ class DeltaFlag(BaseModel):
 def lookup_barcode(barcode: str) -> OFFLookupResult:
     url = f"{OFF_API_BASE}/api/v2/product/{barcode}.json"
     try:
-        resp = requests.get(url, timeout=REQUEST_TIMEOUT_SECONDS)
+        resp = requests.get(
+            url,
+            headers={"User-Agent": OFF_USER_AGENT},
+            params={"fields": "product_name,nutriments"},
+            timeout=REQUEST_TIMEOUT_SECONDS,
+        )
         resp.raise_for_status()
         data = resp.json()
     except requests.RequestException as exc:

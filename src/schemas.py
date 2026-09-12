@@ -12,7 +12,7 @@ the pipeline.
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
@@ -158,6 +158,24 @@ class PortionSelection(BaseModel):
     """What the user actually eats, versus the labelled serving."""
 
     servings_consumed: float = Field(default=1.0, gt=0, le=50)
+
+
+class PersonalizationProfile(BaseModel):
+    """User-entered preferences and targets; never inferred as medical advice."""
+
+    declared_allergens: list[str] = Field(default_factory=list, max_length=30)
+    dietary_preference: Literal["none", "vegetarian", "vegan"] = "none"
+    daily_calorie_goal: Optional[float] = Field(default=None, gt=0, le=10000)
+    daily_protein_goal_g: Optional[float] = Field(default=None, gt=0, le=1000)
+    daily_fibre_goal_g: Optional[float] = Field(default=None, gt=0, le=500)
+    daily_sodium_limit_mg: Optional[float] = Field(default=None, gt=0, le=50000)
+    daily_added_sugar_limit_g: Optional[float] = Field(default=None, gt=0, le=1000)
+
+    @field_validator("declared_allergens")
+    @classmethod
+    def clean_allergens(cls, values: list[str]) -> list[str]:
+        cleaned = {value.strip().lower() for value in values if value.strip()}
+        return sorted(cleaned)
 
 
 class RetakeInstruction(BaseModel):

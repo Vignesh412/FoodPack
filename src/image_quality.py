@@ -23,6 +23,8 @@ from PIL import Image
 from src.schemas import PanelType, RetakeInstruction
 
 MIN_SHORT_EDGE_PX = 600
+MIN_INGREDIENTS_PANORAMA_SHORT_EDGE_PX = 300
+MIN_INGREDIENTS_PANORAMA_LONG_EDGE_PX = 1600
 MAX_GLARE_FRACTION = 0.15       # share of pixels that are near-blown-out white
 MAX_DARK_FRACTION = 0.35        # share of pixels that are near-black (underexposed)
 MIN_LAPLACIAN_VARIANCE = 40.0   # below this, the image reads as out of focus
@@ -50,7 +52,10 @@ class DeterministicCheckResult:
         self.issues = issues
 
 
-def deterministic_precheck(image_bytes: bytes) -> DeterministicCheckResult:
+def deterministic_precheck(
+    image_bytes: bytes,
+    expected_panel: Optional[PanelType] = None,
+) -> DeterministicCheckResult:
     issues: list[str] = []
 
     try:
@@ -59,7 +64,17 @@ def deterministic_precheck(image_bytes: bytes) -> DeterministicCheckResult:
     except Exception:
         return DeterministicCheckResult(passed=False, issues=["File could not be read as an image."])
 
-    if min(width, height) < MIN_SHORT_EDGE_PX:
+    minimum_short_edge = MIN_SHORT_EDGE_PX
+    if (
+        expected_panel == PanelType.INGREDIENTS_ALLERGENS
+        and max(width, height) >= MIN_INGREDIENTS_PANORAMA_LONG_EDGE_PX
+    ):
+        # Ingredient lists are often photographed or stored as a wide strip.
+        # The long-edge requirement preserves overall evidence while the vision
+        # gate still decides whether the individual text is actually readable.
+        minimum_short_edge = MIN_INGREDIENTS_PANORAMA_SHORT_EDGE_PX
+
+    if min(width, height) < minimum_short_edge:
         issues.append(
             f"Image resolution is too low ({width}x{height}). Move closer or use a higher-resolution camera."
         )
@@ -111,7 +126,7 @@ def classify_panel_with_vision(image_bytes: bytes, media_type: str = "image/jpeg
     import anthropic  # lazy import so unit tests never need this installed at import time
 
     client = anthropic.Anthropic(api_key=api_key)
-    model = os.environ.get("FOODPROOF_VISION_MODEL", "claude-opus-4-1-20250805")
+    model = os.environ.get("FOODPROOF_VISION_MODEL", "claude-sonnet-4-6")
     b64_image = base64.b64encode(image_bytes).decode("utf-8")
 
     response = client.messages.create(
@@ -146,7 +161,7 @@ def run_quality_gate(
     vision model if those pass. skip_vision_call=True lets tests and offline
     demos exercise the deterministic layer alone.
     """
-    det = deterministic_precheck(image_bytes)
+    det = deterministic_precheck(image_bytes, expected_panel=expected_panel)
     if not det.passed:
         return RetakeInstruction(
             panel=expected_panel or PanelType.UNKNOWN,

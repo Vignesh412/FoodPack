@@ -7,12 +7,12 @@ export async function POST(request: Request) {
   const apiUrl = env.FOODPROOF_API_URL;
   if (!apiUrl) {
     return NextResponse.json(
-      { detail: 'The analysis service is not configured on this deployment yet.' },
+      { detail: 'The live alternative-search service is not configured on this deployment yet.' },
       { status: 503 },
     );
   }
 
-  const response = await fetch(`${apiUrl.replace(/\/$/, '')}/v1/analyze`, {
+  const response = await fetch(`${apiUrl.replace(/\/$/, '')}/v1/alternatives`, {
     method: 'POST',
     headers: {
       'content-type': 'application/json',

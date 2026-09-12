@@ -6,7 +6,10 @@ __pycache__/
 *.egg-info/
 .venv/
 venv/
+.cache/
+.npm-cache/
 sample_images/*.jpg
 sample_images/*.png
 !sample_images/.gitkeep
 eval_results/
+.screenshot-profiles/

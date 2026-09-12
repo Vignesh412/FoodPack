@@ -3,6 +3,7 @@ import io
 from PIL import Image, ImageDraw, ImageFilter
 
 from src.image_quality import deterministic_precheck, run_quality_gate
+from src.schemas import PanelType
 
 
 def _sharp_label_image() -> bytes:
@@ -36,6 +37,28 @@ def test_low_resolution_image_is_rejected():
     result = deterministic_precheck(buf.getvalue())
     assert result.passed is False
     assert any("resolution" in issue.lower() for issue in result.issues)
+
+
+def test_wide_sharp_ingredients_strip_reaches_the_vision_readability_gate():
+    image = Image.new("L", (2400, 360), color=225)
+    draw = ImageDraw.Draw(image)
+    for y in range(25, 340, 24):
+        draw.line([(30, y), (2370, y)], fill=25, width=3)
+    buffer = io.BytesIO()
+    image.convert("RGB").save(buffer, format="JPEG", quality=95)
+
+    ingredients = deterministic_precheck(
+        buffer.getvalue(),
+        expected_panel=PanelType.INGREDIENTS_ALLERGENS,
+    )
+    nutrition = deterministic_precheck(
+        buffer.getvalue(),
+        expected_panel=PanelType.NUTRITION_FACTS,
+    )
+
+    assert ingredients.passed is True
+    assert nutrition.passed is False
+    assert any("resolution" in issue.lower() for issue in nutrition.issues)
 
 
 def test_blown_out_glare_image_is_rejected():
